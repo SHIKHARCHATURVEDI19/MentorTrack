@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MentorTrack Dashboard — Monitor your mentees' progress on LeetCode and GitHub." />
+  <meta name="theme-color" content="#0a0a1a" />
+  <title>MentorTrack — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Mobile sidebar toggle -->
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="dashboard-layout">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <h1>🎓 MentorTrack</h1>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-page="dashboard">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard</span>
+        </div>
+        <div class="nav-item" data-page="upload">
+          <span class="nav-icon">📤</span>
+          <span>Upload Students</span>
+        </div>
+        <div class="nav-item" data-page="settings">
+          <span class="nav-icon">⚙️</span>
+          <span>Settings</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" id="userAvatar">M</div>
+          <span class="sidebar-username" id="userName">Mentor</span>
+        </div>
+        <button class="sidebar-logout" id="logoutBtn" title="Logout">⏻</button>
+      </div>
+    </aside>
+
+    <!-- ===== Main Content ===== -->
+    <main class="main-content">
+
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <h2 id="pageTitle">Dashboard</h2>
+        <button class="btn btn-export" id="exportBtn">
+          <span class="icon">📥</span>
+          <span>Export Excel</span>
+        </button>
+      </header>
+
+      <!-- ===== Dashboard Page ===== -->
+      <section id="pageDashboard">
+
+        <!-- Stats Cards -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon purple">👥</div>
+            <div class="stat-info">
+              <span class="stat-value" id="statStudents">—</span>
+              <span class="stat-label">Total Students</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon cyan">⚡</div>
+            <div class="stat-info">
+              <span class="stat-value" id="statRating">—</span>
+              <span class="stat-label">Avg LeetCode Rating</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">🔥</div>
+            <div class="stat-info">
+              <span class="stat-value" id="statContrib">—</span>
+              <span class="stat-label">Avg GitHub Contributions</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">✅</div>
+            <div class="stat-info">
+              <span class="stat-value" id="statActive">—</span>
+              <span class="stat-label">Active Students</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state / Upload prompt (shown when no students) -->
+        <div id="emptyState" class="upload-section hidden">
+          <div class="upload-zone" id="uploadZone">
+            <span class="upload-icon">📂</span>
+            <p class="upload-title">Drag & drop your Excel file here</p>
+            <p class="upload-subtitle">or click to browse</p>
+            <p class="upload-hint">Excel with columns: <strong>Student Name</strong>, <strong>LeetCode Handle</strong>, <strong>GitHub Username</strong></p>
+            <input type="file" class="upload-input" id="fileInput" accept=".xlsx,.xls" />
+          </div>
+          <div class="upload-actions">
+            <button class="btn btn-primary" id="uploadBtn" disabled>
+              <span class="btn-text">Upload Students</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Bar (shown when students exist) -->
+        <div id="filterSection" class="hidden">
+          <div class="filter-bar">
+            <div class="filter-pills" id="timePills">
+              <!-- Note: data-months acts as the value. Since we need weeks, we can map 1W = 0.23 months approx, 
+                   or just refactor the JS to use "days". Let's change data-days instead of data-months.
+                   Wait, to avoid major refactor, I can just use decimal months in the JS if needed, but days is better.
+                   Let's use data-days for all of them.
+                   1W = 7, 2W = 14, 3W = 21, 1M = 30, 2M = 60, 3M = 90, 6M = 180, All = 0
+              -->
+              <button class="filter-pill" data-days="7">1W</button>
+              <button class="filter-pill" data-days="14">2W</button>
+              <button class="filter-pill" data-days="21">3W</button>
+              <button class="filter-pill" data-days="30">1M</button>
+              <button class="filter-pill" data-days="60">2M</button>
+              <button class="filter-pill" data-days="90">3M</button>
+              <button class="filter-pill" data-days="180">6M</button>
+              <button class="filter-pill active" data-days="0">All</button>
+            </div>
+            <div class="view-tabs" id="viewTabs">
+              <button class="view-tab active" data-view="leetcode">LeetCode</button>
+              <button class="view-tab" data-view="github">GitHub</button>
+            </div>
+          </div>
+
+          <!-- LeetCode Table -->
+          <div class="table-container" id="leetcodeTableWrap">
+            <div class="table-wrapper">
+              <table class="data-table" id="leetcodeTable">
+                <thead>
+                  <tr>
+                    <th class="col-rank" data-sort="rank">#</th>
+                    <th data-sort="name">Student Name <span class="sort-arrow">▲</span></th>
+                    <th data-sort="handle">Handle <span class="sort-arrow">▲</span></th>
+                    <th data-sort="rating">Rating <span class="sort-arrow">▲</span></th>
+                    <th data-sort="totalSolved">Total Solved <span class="sort-arrow">▲</span></th>
+                    <th data-sort="easy">Easy <span class="sort-arrow">▲</span></th>
+                    <th data-sort="medium">Medium <span class="sort-arrow">▲</span></th>
+                    <th data-sort="hard">Hard <span class="sort-arrow">▲</span></th>
+                    <th data-sort="activeDays">Active Days <span class="sort-arrow">▲</span></th>
+                    <th data-sort="streak">Streak <span class="sort-arrow">▲</span></th>
+                  </tr>
+                </thead>
+                <tbody id="leetcodeBody">
+                  <!-- Rows rendered by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- GitHub Table -->
+          <div class="table-container hidden" id="githubTableWrap">
+            <div class="table-wrapper">
+              <table class="data-table" id="githubTable">
+                <thead>
+                  <tr>
+                    <th class="col-rank" data-sort="rank">#</th>
+                    <th data-sort="name">Student Name <span class="sort-arrow">▲</span></th>
+                    <th data-sort="handle">Username <span class="sort-arrow">▲</span></th>
+                    <th data-sort="contributions">Contributions <span class="sort-arrow">▲</span></th>
+                    <th data-sort="activeDays">Active Days <span class="sort-arrow">▲</span></th>
+                    <th data-sort="streak">Streak <span class="sort-arrow">▲</span></th>
+                    <th data-sort="repos">Repos <span class="sort-arrow">▲</span></th>
+                  </tr>
+                </thead>
+                <tbody id="githubBody">
+                  <!-- Rows populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ===== Upload Page ===== -->
+      <section id="pageUpload" class="hidden">
+        <div class="upload-section">
+          <div class="upload-zone" id="uploadZone2">
+            <span class="upload-icon">📂</span>
+            <p class="upload-title">Drag & drop your Excel file here</p>
+            <p class="upload-subtitle">or click to browse</p>
+            <p class="upload-hint">Excel with columns: <strong>Student Name</strong>, <strong>LeetCode Handle</strong>, <strong>GitHub Username</strong></p>
+            <input type="file" class="upload-input" id="fileInput2" accept=".xlsx,.xls" />
+          </div>
+          <div class="upload-actions mt-2">
+            <button class="btn btn-primary" id="uploadBtn2" disabled>
+              <span class="btn-text">Upload Students</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Settings Page ===== -->
+      <section id="pageSettings" class="hidden">
+        <div class="settings-grid">
+          <div class="section-panel">
+            <h3 class="section-title">Account</h3>
+            <div class="form-group">
+              <label>Mentor Name</label>
+              <input type="text" class="form-input" id="settingName" placeholder="Your name" />
+            </div>
+            <div class="form-group mt-2">
+              <label>Email</label>
+              <input type="email" class="form-input" id="settingEmail" placeholder="Your email" disabled />
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

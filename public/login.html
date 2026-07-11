@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MentorTrack — Track your mentees' coding journey across LeetCode and GitHub." />
+  <meta name="theme-color" content="#0a0a1a" />
+  <title>MentorTrack — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Animated mesh gradient background -->
+  <div class="mesh-bg">
+    <div class="mesh-orb"></div>
+  </div>
+
+  <!-- Auth Page -->
+  <main class="auth-page">
+    <section class="auth-card">
+
+      <!-- Logo -->
+      <div class="auth-logo">
+        <h1>🎓 MentorTrack</h1>
+      </div>
+      <p class="auth-tagline">Track your mentees' coding journey</p>
+
+      <!-- Tab Toggle -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="signin">Sign In</button>
+        <button class="auth-tab" data-tab="signup">Sign Up</button>
+      </div>
+
+      <!-- Sign In Form -->
+      <form id="signinForm" class="auth-form active" novalidate>
+        <div class="form-group">
+          <label for="si-email">Email</label>
+          <input type="email" id="si-email" class="form-input" placeholder="you@example.com" autocomplete="email" />
+          <span class="form-error" id="si-email-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="si-password">Password</label>
+          <input type="password" id="si-password" class="form-input" placeholder="••••••••" autocomplete="current-password" />
+          <span class="form-error" id="si-password-error"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block mt-1">
+          <span class="btn-text">Sign In</span>
+        </button>
+
+        <p class="form-error text-center mt-1" id="si-form-error"></p>
+      </form>
+
+      <!-- Sign Up Form -->
+      <form id="signupForm" class="auth-form" novalidate>
+        <div class="form-group">
+          <label for="su-name">Full Name</label>
+          <input type="text" id="su-name" class="form-input" placeholder="John Doe" autocomplete="name" />
+          <span class="form-error" id="su-name-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="su-email">Email</label>
+          <input type="email" id="su-email" class="form-input" placeholder="you@example.com" autocomplete="email" />
+          <span class="form-error" id="su-email-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="su-password">Password</label>
+          <input type="password" id="su-password" class="form-input" placeholder="Min 6 characters" autocomplete="new-password" />
+          <span class="form-error" id="su-password-error"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="su-confirm">Confirm Password</label>
+          <input type="password" id="su-confirm" class="form-input" placeholder="Re-enter password" autocomplete="new-password" />
+          <span class="form-error" id="su-confirm-error"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block mt-1">
+          <span class="btn-text">Create Account</span>
+        </button>
+
+        <p class="form-error text-center mt-1" id="su-form-error"></p>
+      </form>
+
+    </section>
+  </main>
+
+  <script src="js/auth.js"></script>
+</body>
+</html>
