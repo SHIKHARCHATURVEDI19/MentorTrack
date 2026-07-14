@@ -8,17 +8,8 @@ const supabase = require('../services/supabaseClient');
 
 const router = express.Router();
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadsDir = path.join(__dirname, '..', 'uploads');
-    cb(null, uploadsDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueName = Date.now() + '-' + file.originalname;
-    cb(null, uniqueName);
-  }
-});
+// Configure multer for memory storage (Serverless compatible)
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
@@ -60,8 +51,8 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
       return res.status(400).json({ error: 'No file uploaded. Please upload an .xlsx or .xls file.' });
     }
 
-    // Parse the Excel file
-    const workbook = xlsx.readFile(req.file.path);
+    // Parse the Excel file from RAM buffer
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     const rawData = xlsx.utils.sheet_to_json(sheet);

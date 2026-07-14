@@ -8,25 +8,27 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Ensure data/ and uploads/ directories exist
-const dataDir = path.join(__dirname, 'data');
-const uploadsDir = path.join(__dirname, 'uploads');
+// Ensure data/ and uploads/ directories exist (skip on Vercel Serverless)
+if (!process.env.VERCEL) {
+  const dataDir = path.join(__dirname, 'data');
+  const uploadsDir = path.join(__dirname, 'uploads');
 
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-  console.log('Created data/ directory');
-}
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+    console.log('Created data/ directory');
+  }
 
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-  console.log('Created uploads/ directory');
-}
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log('Created uploads/ directory');
+  }
 
-// Initialize data/mentors.json if it doesn't exist
-const mentorsFile = path.join(dataDir, 'mentors.json');
-if (!fs.existsSync(mentorsFile)) {
-  fs.writeFileSync(mentorsFile, JSON.stringify([], null, 2));
-  console.log('Initialized data/mentors.json');
+  // Initialize data/mentors.json if it doesn't exist
+  const mentorsFile = path.join(dataDir, 'mentors.json');
+  if (!fs.existsSync(mentorsFile)) {
+    fs.writeFileSync(mentorsFile, JSON.stringify([], null, 2));
+    console.log('Initialized data/mentors.json');
+  }
 }
 
 // Security & Middleware
@@ -77,9 +79,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal Server Error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Mentor-Mentee Tracker server running on http://localhost:${PORT}`);
-  
-  // Start background monitoring jobs
-  require('./services/cron').startJob();
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Mentor-Mentee Tracker server running on http://localhost:${PORT}`);
+    
+    // Start background monitoring jobs only if not on Vercel
+    require('./services/cron').startJob();
+  });
+}
+
+// Export for Vercel
+module.exports = app;
