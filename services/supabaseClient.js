@@ -10,3 +10,6 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder');
 
 module.exports = supabase;
+console.log("SUPABASE URL:", supabaseUrl);
+console.log("Using Service Key:", supabaseKey?.startsWith("eyJ"));
+console.log("Key Length:", supabaseKey?.length);

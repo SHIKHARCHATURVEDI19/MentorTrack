@@ -9,7 +9,7 @@
   //  Constants & State
   // ==========================
   const API = '';                     // same-origin
-  const token = localStorage.getItem('mentorToken');
+  const token = localStorage.getItem('token');
 
   // Auth guard
   if (!token) {
@@ -25,7 +25,7 @@
   // Global application state
   const state = {
     mentor: null,
-    students: [],
+    students: [], 
     leetcodeData: {},   // keyed by student id
     githubData: {},     // keyed by student id
     currentView: 'leetcode',
@@ -63,6 +63,7 @@
     // Stats
     statStudents:   $('#statStudents'),
     statRating:     $('#statRating'),
+    statAvgSolved:  $('#statAvgSolved'),
     statContrib:    $('#statContrib'),
     statActive:     $('#statActive'),
 
@@ -447,6 +448,7 @@
 
     if (n === 0) {
       DOM.statRating.textContent = '—';
+      if(DOM.statAvgSolved) DOM.statAvgSolved.textContent = '—';
       DOM.statContrib.textContent = '—';
       DOM.statActive.textContent = '—';
       return;
@@ -454,6 +456,7 @@
 
     // Average LeetCode rating
     let totalRating = 0, ratingCount = 0;
+    let totalSolvedAll = 0, solvedCount = 0;
     let totalContrib = 0, contribCount = 0;
     let activeCount = 0;
 
@@ -465,6 +468,11 @@
       if (lc && (lc.contestRating || lc.rating)) {
         totalRating += (lc.contestRating || lc.rating);
         ratingCount++;
+      }
+      
+      if (lc && lc.totalSolved !== undefined) {
+        totalSolvedAll += lc.totalSolved;
+        solvedCount++;
       }
 
       if (gh) {
@@ -479,14 +487,15 @@
       if (hasActivity) activeCount++;
     });
 
-    DOM.statRating.textContent = ratingCount > 0
-      ? formatNumber(Math.round(totalRating / ratingCount))
-      : '—';
+    const avgRating = ratingCount > 0 ? Math.round(totalRating / ratingCount) : 0;
+    DOM.statRating.textContent = avgRating || '—';
+    
+    const avgSolved = solvedCount > 0 ? Math.round(totalSolvedAll / solvedCount) : 0;
+    if(DOM.statAvgSolved) DOM.statAvgSolved.textContent = avgSolved || '—';
 
-    DOM.statContrib.textContent = contribCount > 0
-      ? formatNumber(Math.round(totalContrib / contribCount))
-      : '—';
-
+    const avgContrib = contribCount > 0 ? Math.round(totalContrib / contribCount) : 0;
+    DOM.statContrib.textContent = avgContrib || '—';
+    
     DOM.statActive.textContent = formatNumber(activeCount);
   }
 
@@ -524,11 +533,11 @@
   // ==========================
   //  Filtering
   // ==========================
-  function setFilter(months) {
-    state.currentFilter = months;
+  function setFilter(days) {
+    state.currentFilter = days;
 
     DOM.timePills.forEach(p => {
-      p.classList.toggle('active', parseInt(p.dataset.months) === months);
+      p.classList.toggle('active', parseInt(p.dataset.days) === days);
     });
 
     renderCurrentView();

@@ -54,7 +54,7 @@ function findColumn(headers, ...possibleNames) {
 }
 
 // POST /api/upload (protected)
-router.post('/upload', authMiddleware, upload.single('file'), (req, res) => {
+router.post('/upload', authMiddleware, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded. Please upload an .xlsx or .xls file.' });

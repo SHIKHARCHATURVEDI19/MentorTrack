@@ -98,33 +98,75 @@ async function fetchGitHubData(username) {
       result.errors.push(`GitHub profile API returned status ${profileRes.status}`);
     }
 
-    // 2. Load Activity Data from local file
-    if (fs.existsSync(ACTIVITY_FILE)) {
-      const activityData = JSON.parse(fs.readFileSync(ACTIVITY_FILE, 'utf-8'));
-      // Compare lowercased username to handle case differences
-      const userActivity = activityData[username.toLowerCase()];
+    // 2. Fetch Contributions Data via direct HTML Scraping (Most Reliable)
+    const contribRes = await fetch(`https://github.com/users/${encodeURIComponent(username)}/contributions`, { headers, timeout: 10000 });
+    
+    if (contribRes.ok) {
+      const html = await contribRes.text();
+      const tdRegex = /<td[^>]*data-date="([^"]+)"[^>]*id="([^"]+)"/g;
+      const toolRegex = /<tool-tip[^>]*for="([^"]+)"[^>]*>([^<]+)<\/tool-tip>/g;
+      
+      let toolMap = {};
+      let toolMatch;
+      while ((toolMatch = toolRegex.exec(html)) !== null) {
+          toolMap[toolMatch[1]] = toolMatch[2];
+      }
+      
+      const dateSet = new Set();
+      result.contributionCalendar = {};
+      let totalContribs = 0;
+      
+      let tdMatch;
+      while ((tdMatch = tdRegex.exec(html)) !== null) {
+          let date = tdMatch[1];
+          let id = tdMatch[2];
+          let tooltip = toolMap[id];
+          if (tooltip && !tooltip.includes('No contributions')) {
+             let countStr = tooltip.split(' ')[0];
+             let count = parseInt(countStr);
+             if (!isNaN(count)) {
+               dateSet.add(date);
+               result.contributionCalendar[date] = count;
+               totalContribs += count;
+             }
+          }
+      }
+      
+      result.totalContributions = totalContribs;
+      
+      const activeDays = Array.from(dateSet).sort((a, b) => new Date(b) - new Date(a)); // Sort descending
+      
+      result.activeDays30 = activeDays.filter(d => isWithinDays(d, 30)).length;
+      result.activeDays60 = activeDays.filter(d => isWithinDays(d, 60)).length;
+      result.totalActiveDays = activeDays.length;
+      result.currentStreak = calculateStreak(activeDays);
+      result.lastActivityDate = activeDays.length > 0 ? activeDays[0] : null;
 
-      if (userActivity) {
-        result.lastActivityDate = userActivity.lastActivityDate;
-        result.lastChecked = userActivity.lastChecked;
-        
-        const activeDays = userActivity.activeDays || [];
-        
+      if (result.lastActivityDate && isWithinDays(result.lastActivityDate, 3)) {
+        result.status = 'Active';
+      }
+    } else {
+      // Fallback to recent events if scraping fails
+      const eventsRes = await fetch(`${GITHUB_API_BASE}/users/${encodeURIComponent(username)}/events/public?per_page=100`, { headers, timeout: 10000 });
+      if (eventsRes.ok) {
+        const events = await eventsRes.json();
+        const dateSet = new Set();
+        events.forEach(event => {
+          if (event.created_at) {
+            dateSet.add(event.created_at.split('T')[0]);
+          }
+        });
+        const activeDays = Array.from(dateSet).sort((a, b) => new Date(b) - new Date(a));
         result.activeDays30 = activeDays.filter(d => isWithinDays(d, 30)).length;
         result.activeDays60 = activeDays.filter(d => isWithinDays(d, 60)).length;
         result.totalActiveDays = activeDays.length;
-        result.contributionCalendar = userActivity.contributionCalendar || {};
-        result.totalContributions = Object.values(result.contributionCalendar).reduce((a, b) => a + b, 0);
-        
         result.currentStreak = calculateStreak(activeDays);
-        
-        // Status is active if they had activity in the last 3 days
+        result.lastActivityDate = activeDays.length > 0 ? activeDays[0] : null;
         if (result.lastActivityDate && isWithinDays(result.lastActivityDate, 3)) {
           result.status = 'Active';
         }
       }
     }
-
   } catch (err) {
     result.error = true;
     result.errors.push(`GitHub integration error: ${err.message}`);
