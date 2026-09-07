@@ -3,540 +3,234 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="MentorTrack — Supercharge your mentorship with automated LeetCode and GitHub tracking." />
-  <meta name="theme-color" content="#0a0a1a" />
+  <meta name="description" content="MentorTrack — Supercharge your mentorship with automated tracking." />
+  <meta name="theme-color" content="#000000" />
   <title>MentorTrack — The Ultimate Mentorship Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    /* Landing Page Specific Overrides & Animations */
-    
-    /* Animations */
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-15px); }
-      100% { transform: translateY(0px); }
-    }
-
-    @keyframes glowPulse {
-      0% { box-shadow: 0 0 10px rgba(0, 212, 255, 0.2); }
-      50% { box-shadow: 0 0 25px rgba(0, 212, 255, 0.6); }
-      100% { box-shadow: 0 0 10px rgba(0, 212, 255, 0.2); }
-    }
-
-    .animate-fade-up {
-      animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-      opacity: 0; /* starts hidden */
-    }
-
-    .delay-1 { animation-delay: 0.1s; }
-    .delay-2 { animation-delay: 0.2s; }
-    .delay-3 { animation-delay: 0.3s; }
-
-    .floating {
-      animation: float 6s ease-in-out infinite;
-    }
-
+    /* Landing Page Vercel-style Overrides */
     body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
       overflow-x: hidden;
-      scroll-behavior: smooth;
     }
     
     /* Navbar */
-    .navbar {
+    .vercel-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.5rem 5%;
+      padding: 1.5rem 4%;
       position: absolute;
       top: 0;
       width: 100%;
-      z-index: 10;
+      z-index: 100;
     }
-
-    .navbar-logo {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #fff;
-      text-decoration: none;
+    .nav-left {
       display: flex;
       align-items: center;
-      gap: 8px;
-    }
-
-    .navbar-links {
-      display: flex;
       gap: 2rem;
-      align-items: center;
     }
-
-    .nav-link {
-      color: var(--text-secondary);
+    .logo-triangle {
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 18px solid #fff;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .nav-links a {
+      color: #888;
       text-decoration: none;
+      font-size: 0.9rem;
       font-weight: 500;
-      transition: color 0.3s ease;
+      transition: color 0.2s;
     }
-
-    .nav-link:hover {
+    .nav-links a:hover {
       color: #fff;
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .btn-outline {
+      background: #000;
+      color: #fff;
+      border: 1px solid #333;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover {
+      background: #111;
+      border-color: #666;
+    }
+    .btn-solid {
+      background: #fff;
+      color: #000;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-solid:hover {
+      background: #e6e6e6;
     }
 
     /* Hero Section */
-    .hero-section {
+    .hero {
+      position: relative;
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
       align-items: center;
-      text-align: center;
-      padding: 0 1rem;
-      position: relative;
-      z-index: 2;
+      justify-content: space-between;
+      padding: 0 5%;
+      overflow: hidden;
+    }
+    
+    .hero-bg-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      pointer-events: none;
     }
 
+    .hero-center-triangle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0;
+      height: 0;
+      border-left: 150px solid transparent;
+      border-right: 150px solid transparent;
+      border-bottom: 260px solid #000;
+      filter: drop-shadow(0 0 40px rgba(255,255,255,0.4));
+      z-index: 1;
+    }
+    /* Inner black triangle to create the stroke effect if needed, but solid black over white glow is exactly Vercel's look */
+
+    .hero-content-left {
+      position: relative;
+      z-index: 2;
+      max-width: 500px;
+    }
     .hero-title {
       font-size: 5rem;
-      font-weight: 800;
-      line-height: 1.1;
-      margin-bottom: 1.5rem;
-      color: #fff;
-      letter-spacing: -1px;
-    }
-
-    .hero-title span {
-      background: var(--primary-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: inline-block;
-    }
-
-    .hero-subtitle {
-      font-size: 1.25rem;
-      color: var(--text-secondary);
-      max-width: 600px;
-      margin-bottom: 3rem;
-      line-height: 1.6;
-    }
-
-    .btn-large {
-      padding: 1.2rem 3rem;
-      font-size: 1.1rem;
       font-weight: 600;
-      border-radius: 50px;
-      animation: glowPulse 3s infinite;
-      transition: transform 0.3s ease;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      margin-bottom: 2rem;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
     }
 
-    .btn-large:hover {
-      transform: scale(1.05);
-    }
-
-    /* Features Section */
-    .features-section {
-      padding: 8rem 5%;
-      background: rgba(0, 0, 0, 0.4);
+    .hero-content-right {
       position: relative;
       z-index: 2;
-      border-top: 1px solid var(--card-border);
-    }
-
-    .section-title {
-      text-align: center;
-      font-size: 3rem;
-      margin-bottom: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 2;
       color: #fff;
-      font-weight: 800;
-    }
-
-    .section-subtitle {
-      text-align: center;
-      color: var(--text-secondary);
-      margin-bottom: 4rem;
-      font-size: 1.1rem;
-    }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .feature-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 3rem 2rem;
-      backdrop-filter: blur(12px);
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* Micro-animation: Glowing border effect on hover */
-    .feature-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      border-radius: 20px;
-      padding: 2px;
-      background: linear-gradient(135deg, #00d4ff, #667eea);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-    }
-
-    .feature-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 40px rgba(0, 212, 255, 0.15);
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .feature-card:hover::before {
-      opacity: 1;
-    }
-
-    .feature-icon {
-      font-size: 3rem;
-      margin-bottom: 1.5rem;
-      display: inline-block;
-    }
-
-    .feature-title {
-      font-size: 1.5rem;
-      color: #fff;
-      margin-bottom: 1rem;
-      font-weight: 700;
-    }
-
-    .feature-text {
-      color: var(--text-secondary);
-      line-height: 1.7;
-    }
-
-    /* Contact Section */
-    .contact-section {
-      padding: 8rem 5%;
-      position: relative;
-      z-index: 2;
-      display: flex;
-      justify-content: center;
-    }
-
-    .contact-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-card);
-      border-radius: 24px;
-      padding: 4rem;
-      width: 100%;
-      max-width: 800px;
-      box-shadow: var(--shadow-card);
-      text-align: center;
-    }
-
-    .contact-card h2 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      color: #fff;
-    }
-
-    .contact-card p {
-      color: var(--text-secondary);
-      margin-bottom: 3rem;
-    }
-
-    .contact-form {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
+      letter-spacing: 0.05em;
       text-align: left;
     }
-
-    .contact-form textarea {
-      resize: vertical;
-      min-height: 120px;
+    .hero-content-right p {
+      margin: 0;
     }
 
-    /* Footer */
-    .site-footer {
-      padding: 4rem 5%;
-      background: #05050f;
-      text-align: center;
-      border-top: 1px solid var(--card-border);
-      position: relative;
-      z-index: 2;
-    }
-
-    .footer-content {
-      max-width: 1200px;
-      margin: 0 auto;
+    /* Footer Logos */
+    .footer-logos {
+      position: absolute;
+      bottom: 2rem;
+      width: 100%;
       display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      align-items: center;
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 2rem;
-    }
-
-    .footer-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    .footer-links a:hover {
-      color: var(--accent);
-    }
-
-    .footer-copy {
-      color: rgba(255, 255, 255, 0.3);
-      font-size: 0.9rem;
-    }
-    .how-it-works-section {
-      padding: 8rem 5%;
-      position: relative;
-      z-index: 2;
-    }
-    .hiw-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
       gap: 4rem;
+      z-index: 2;
+      opacity: 0.6;
+    }
+    .footer-logos span {
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
     }
     
-    @media (min-width: 900px) {
-      .hiw-container {
-        flex-direction: row;
-        align-items: flex-start;
-      }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
-    .hiw-image-wrap {
-      flex: 1;
-      width: 100%;
-      border-radius: 16px;
-      overflow: hidden;
-      border: 1px solid var(--border-card);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-      position: relative;
-    }
-
-    /* Glow behind image */
-    .hiw-image-wrap::before {
-      content: '';
-      position: absolute;
-      top: -10%; left: -10%; right: -10%; bottom: -10%;
-      background: radial-gradient(circle, rgba(102, 126, 234, 0.2) 0%, transparent 60%);
-      z-index: -1;
-    }
-
-    .hiw-image-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-      transition: transform 0.5s ease;
-    }
-    
-    .hiw-image-wrap:hover img {
-      transform: scale(1.02);
-    }
-
-    .hiw-steps {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 2.5rem;
-    }
-
-    .hiw-step {
-      display: flex;
-      gap: 1.5rem;
-      align-items: flex-start;
-    }
-
-    .hiw-step-num {
-      width: 48px;
-      height: 48px;
-      min-width: 48px;
-      background: var(--primary-gradient);
-      color: #fff;
-      font-size: 1.25rem;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-
-    .hiw-step-content h3 {
-      font-size: 1.5rem;
-      color: #fff;
-      margin-bottom: 0.5rem;
-    }
-
-    .hiw-step-content p {
-      color: var(--text-secondary);
-      line-height: 1.6;
+    .animate-in {
+      animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
   </style>
 </head>
 <body>
 
-  <!-- Animated mesh gradient background -->
-  <div class="mesh-bg">
-    <div class="mesh-orb floating"></div>
-  </div>
-
-  <!-- Navigation -->
-  <nav class="navbar animate-fade-up">
-    <a href="#" class="navbar-logo">
-      <span style="font-size: 1.8rem;">&#127891;</span> MentorTrack
-    </a>
-    <div class="navbar-links">
-      <a href="#features" class="nav-link">Features</a>
-      <a href="#contact" class="nav-link">Contact Us</a>
-      <a href="login.html" class="nav-link" style="color: #fff; font-weight: 600;">Log In</a>
+  <!-- Navbar -->
+  <nav class="vercel-nav animate-in">
+    <div class="nav-left">
+      <a href="/" class="logo-triangle"></a>
+      <div class="nav-links">
+        <a href="#features">Products</a>
+        <a href="#resources">Resources</a>
+        <a href="#enterprise">Enterprise</a>
+        <a href="#pricing">Pricing</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a href="login.html" class="btn-outline">Log In</a>
+      <a href="login.html" class="btn-solid">Sign Up</a>
     </div>
   </nav>
 
   <!-- Hero Section -->
-  <main class="hero-section">
-    <h1 class="hero-title animate-fade-up delay-1">Supercharge Your <br><span>Mentorship</span></h1>
-    <p class="hero-subtitle animate-fade-up delay-2">
-      Automate tracking for your students' LeetCode and GitHub progress. Zero friction. No passwords required. Gain insights instantly.
-    </p>
-    <div class="animate-fade-up delay-3">
-      <a href="login.html" class="btn btn-primary btn-large">Start Tracking Free</a>
+  <main class="hero">
+    <div class="hero-bg-glow"></div>
+    <div class="hero-center-triangle animate-in" style="animation-duration: 2s;"></div>
+
+    <div class="hero-content-left animate-in">
+      <h1 class="hero-title">Mentorship<br>Infrastructure</h1>
+      <div class="hero-buttons">
+        <a href="login.html" class="btn-solid" style="padding: 0.8rem 1.5rem; font-size: 1rem;">Deploy Now</a>
+        <a href="#contact" class="btn-outline" style="padding: 0.8rem 1.5rem; font-size: 1rem;">Talk to Sales</a>
+      </div>
+    </div>
+
+    <div class="hero-content-right animate-in" style="animation-delay: 0.2s; opacity: 0;">
+      <p>FOR MENTORSHIP AGENTS</p>
+      <p>TO TRACK LEETCODE AND GITHUB</p>
+      <p>AUTOMATED BY MENTORTRACK</p>
+    </div>
+
+    <div class="footer-logos animate-in" style="animation-delay: 0.4s; opacity: 0;">
+      <span>Vercel</span>
+      <span>GitHub</span>
+      <span>LeetCode</span>
+      <span>Supabase</span>
     </div>
   </main>
-
-  <!-- How It Works Section -->
-  <section class="how-it-works-section">
-    <h2 class="section-title" style="margin-bottom: 4rem;">How it works</h2>
-    <div class="hiw-container">
-      
-      <!-- Dashboard Mockup Image -->
-      <div class="hiw-image-wrap animate-fade-up" style="animation-delay: 0.2s;">
-        <img src="images/dashboard_mockup.png" alt="MentorTrack Dashboard Mockup" />
-      </div>
-
-      <!-- Step-by-step -->
-      <div class="hiw-steps">
-        <div class="hiw-step animate-fade-up" style="animation-delay: 0.3s;">
-          <div class="hiw-step-num">1</div>
-          <div class="hiw-step-content">
-            <h3>Create an Account</h3>
-            <p>Sign up in exactly 5 seconds. No complex configurations or lengthy tutorials required.</p>
-          </div>
-        </div>
-
-        <div class="hiw-step animate-fade-up" style="animation-delay: 0.4s;">
-          <div class="hiw-step-num">2</div>
-          <div class="hiw-step-content">
-            <h3>Upload Sheet</h3>
-            <p>Simply drag and drop an Excel sheet containing your students' names and their public LeetCode/GitHub handles.</p>
-          </div>
-        </div>
-
-        <div class="hiw-step animate-fade-up" style="animation-delay: 0.5s;">
-          <div class="hiw-step-num">3</div>
-          <div class="hiw-step-content">
-            <h3>Get Data Instantly</h3>
-            <p>Watch as our background system instantly fetches all their real-time stats and builds a comprehensive historical dashboard.</p>
-          </div>
-        </div>
-
-        <div class="hiw-step animate-fade-up" style="animation-delay: 0.6s;">
-          <div class="hiw-step-num">4</div>
-          <div class="hiw-step-content">
-            <h3>Export Reports</h3>
-            <p>Click export to instantly download beautiful, ready-to-present Excel reports of your cohort's progress for your organization.</p>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Features Section -->
-  <section id="features" class="features-section">
-    <h2 class="section-title">Everything you need</h2>
-    <p class="section-subtitle">Guide your mentees with powerful, automated insights.</p>
-    
-    <div class="feature-grid">
-      <div class="feature-card floating" style="animation-delay: 0s;">
-        <div class="feature-icon">&#128200;</div>
-        <h3 class="feature-title">Real-Time Tracking</h3>
-        <p class="feature-text">Monitor total solved LeetCode problems, GitHub contributions, active days, and current streaks without lifting a finger.</p>
-      </div>
-
-      <div class="feature-card floating" style="animation-delay: 2s;">
-        <div class="feature-icon">&#9203;</div>
-        <h3 class="feature-title">Historical Growth (+X)</h3>
-        <p class="feature-text">Select timeframes (1 Week, 1 Month, 6 Months) to instantly see exactly how much a student has grown over time.</p>
-      </div>
-
-      <div class="feature-card floating" style="animation-delay: 4s;">
-        <div class="feature-icon">&#128640;</div>
-        <h3 class="feature-title">Zero-Friction</h3>
-        <p class="feature-text">Just upload an Excel sheet with their public handles. Students don't even need to create an account or provide OAuth permissions.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Contact Section -->
-  <section id="contact" class="contact-section">
-    <div class="contact-card">
-      <h2>Get In Touch</h2>
-      <p>Have questions before you start tracking? Send us a message.</p>
-      <form class="contact-form" onsubmit="event.preventDefault(); alert('Message Sent!');">
-        <div class="form-group">
-          <label for="contact-name">Name</label>
-          <input type="text" id="contact-name" class="form-input" placeholder="Your Name" required />
-        </div>
-        <div class="form-group">
-          <label for="contact-email">Email</label>
-          <input type="email" id="contact-email" class="form-input" placeholder="you@example.com" required />
-        </div>
-        <div class="form-group">
-          <label for="contact-msg">Message</label>
-          <textarea id="contact-msg" class="form-input" placeholder="How can we help?" required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Send Message</button>
-      </form>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="site-footer">
-    <div class="footer-content">
-      <h3 style="color: #fff; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-        &#127891; MentorTrack
-      </h3>
-      <div class="footer-links">
-        <a href="#contact">Contact Us</a>
-        <a href="privacy.html">Privacy Policy</a>
-        <a href="terms.html">Terms of Service</a>
-      </div>
-      <p class="footer-copy">&copy; 2026 MentorTrack. All rights reserved.</p>
-    </div>
-  </footer>
 
 </body>
 </html>

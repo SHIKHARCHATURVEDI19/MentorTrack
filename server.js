@@ -36,18 +36,19 @@ app.use(helmet({
   contentSecurityPolicy: false // Disabled to allow inline styles/scripts for now
 }));
 
-const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? ['https://mentortrack.glbitm.ac.in', 'https://mentormentee.onrender.com'] 
-  : ['http://localhost:3000', 'http://127.0.0.1:3000'];
+const isProd = process.env.NODE_ENV === 'production';
+const customAllowed = ['https://mentortrack.glbitm.ac.in', 'https://mentormentee.onrender.com'];
 
 app.use(cors({
   origin: function(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    if (!origin) return callback(null, true);
+    if (!isProd) return callback(null, true); // Always allow in dev/local
+    if (origin.includes('localhost') || origin.includes('127.0.0.1') || origin.endsWith('.vercel.app') || origin.endsWith('.onrender.com') || customAllowed.includes(origin)) {
+      return callback(null, true);
     }
-  }
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
 }));
 
 app.use(express.json());

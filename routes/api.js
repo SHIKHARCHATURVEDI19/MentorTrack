@@ -3,7 +3,7 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 const authMiddleware = require('../middleware/auth');
-const supabase = require('../services/supabaseClient');
+const db = require('../services/db');
 const { fetchLeetCodeData } = require('../services/leetcode');
 const { fetchGitHubData } = require('../services/github');
 
@@ -21,46 +21,8 @@ router.get('/leetcode/:handle', authMiddleware, async (req, res) => {
     console.log(`Fetching LeetCode data for: ${handle}`);
     const data = await fetchLeetCodeData(handle);
 
-    // Fetch student IDs matching this handle
-    const { data: students } = await supabase
-      .from('students')
-      .select('id')
-      .eq('leetcode_handle', handle);
-
-    let history = [];
-    if (students && students.length > 0) {
-      const studentIds = students.map(s => s.id);
-      // Fetch history for these students
-      const { data: historyData } = await supabase
-        .from('leetcode_history')
-        .select('*')
-        .in('student_id', studentIds);
-      
-      if (historyData) {
-        // Map to frontend expected format and deduplicate by date (in case multiple mentors track the same handle)
-        const uniqueDates = {};
-        historyData.forEach(record => {
-          uniqueDates[record.snapshot_date] = {
-            date: record.snapshot_date,
-            totalSolved: record.total_solved,
-            easy: record.easy_solved,
-            medium: record.medium_solved,
-            hard: record.hard_solved
-          };
-        });
-        history = Object.values(uniqueDates);
-      }
-    }
-    
-    // As a fallback, check the old JSON file if Supabase has no history yet
-    if (history.length === 0) {
-      const historyFile = path.join(__dirname, '..', 'data', 'leetcode_history.json');
-      if (fs.existsSync(historyFile)) {
-        const historyData = JSON.parse(fs.readFileSync(historyFile, 'utf-8'));
-        history = historyData[handle] || [];
-      }
-    }
-
+    // Fetch history from resilient storage
+    const history = await db.getLeetCodeHistory(handle);
     data.history = history;
 
     res.json(data);
@@ -94,24 +56,12 @@ router.get('/export', authMiddleware, async (req, res) => {
   try {
     const mentorId = req.user.id;
 
-    // Fetch students from Supabase
-    const { data: dbStudents, error } = await supabase
-      .from('students')
-      .select('*')
-      .eq('mentor_id', mentorId);
+    // Fetch students from resilient storage
+    const students = await db.getStudentsByMentor(mentorId);
 
-    if (error) throw error;
-
-    if (!dbStudents || dbStudents.length === 0) {
+    if (!students || students.length === 0) {
       return res.status(404).json({ error: 'No students found. Please upload a student list first.' });
     }
-
-    // Map to old format for existing logic
-    const students = dbStudents.map(s => ({
-      name: s.name,
-      leetcodeHandle: s.leetcode_handle,
-      githubUsername: s.github_username
-    }));
 
     console.log(`Generating export for ${students.length} students (mentor: ${mentorId})`);
 

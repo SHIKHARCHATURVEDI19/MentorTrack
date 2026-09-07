@@ -5,20 +5,20 @@ const { body, validationResult } = require('express-validator');
 const rateLimit = require('express-rate-limit');
 const authMiddleware = require('../middleware/auth');
 const { JWT_SECRET } = require('../middleware/auth');
-const supabase = require('../services/supabaseClient');
+const db = require('../services/db');
 
 const router = express.Router();
 
 // --- Rate Limiting Configurations ---
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 30, // generous limit for development/production
   message: { error: 'Too many login attempts from this IP, please try again after 15 minutes.' }
 });
 
 const signupLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 5,
+  max: 20,
   message: { error: 'Too many accounts created from this IP, please try again after an hour.' }
 });
 
@@ -27,7 +27,7 @@ function generateToken(user) {
     { id: user.id, email: user.email, name: user.name },
     JWT_SECRET,
     { 
-      expiresIn: '24h',
+      expiresIn: '7d',
       issuer: 'MentorTrack',
       audience: 'MentorTrack-Users'
     }
@@ -54,12 +54,7 @@ router.post(
       const { email, password, name } = req.body;
 
       // Check if email already exists
-      const { data: existingUser, error: checkError } = await supabase
-        .from('mentors')
-        .select('id')
-        .eq('email', email)
-        .single();
-
+      const existingUser = await db.findMentorByEmail(email);
       if (existingUser) {
         console.warn(`[AUDIT] Failed signup attempt (Email Exists): ${email}`);
         return res.status(409).json({ error: 'An account with this email already exists.' });
@@ -70,13 +65,7 @@ router.post(
       const hashedPassword = await bcrypt.hash(password, salt);
 
       // Create new mentor
-      const { data: newMentor, error: insertError } = await supabase
-        .from('mentors')
-        .insert([{ email, name, password_hash: hashedPassword }])
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
+      const newMentor = await db.createMentor({ email, name, password_hash: hashedPassword });
 
       const token = generateToken(newMentor);
       console.log(`[AUDIT] Successful signup: ${email} (ID: ${newMentor.id})`);
@@ -112,13 +101,9 @@ router.post(
       const { email, password } = req.body;
 
       // Find mentor by email
-      const { data: mentor, error: fetchError } = await supabase
-        .from('mentors')
-        .select('*')
-        .eq('email', email)
-        .single();
+      const mentor = await db.findMentorByEmail(email);
 
-      if (!mentor || fetchError) {
+      if (!mentor) {
         console.warn(`[AUDIT] Failed login attempt (User Not Found): ${email}`);
         return res.status(401).json({ error: 'Invalid email or password.' });
       }
@@ -148,13 +133,8 @@ router.post(
 // GET /api/auth/me (protected)
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const { data: mentor, error } = await supabase
-      .from('mentors')
-      .select('id, email, name, created_at')
-      .eq('id', req.user.id)
-      .single();
-
-    if (!mentor || error) {
+    const mentor = await db.findMentorById(req.user.id);
+    if (!mentor) {
       return res.status(404).json({ error: 'User not found.' });
     }
 

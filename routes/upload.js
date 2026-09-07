@@ -4,17 +4,18 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 const authMiddleware = require('../middleware/auth');
-const supabase = require('../services/supabaseClient');
+const db = require('../services/db');
 
 const router = express.Router();
 
-// Configure multer for memory storage (Serverless compatible)
+// Configure multer for memory storage (Serverless and VPS compatible)
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-    'application/vnd.ms-excel' // .xls
+    'application/vnd.ms-excel', // .xls
+    'application/octet-stream'
   ];
   const allowedExtensions = ['.xlsx', '.xls'];
   const ext = path.extname(file.originalname).toLowerCase();
@@ -30,7 +31,6 @@ const upload = multer({ storage, fileFilter, limits: { fileSize: 10 * 1024 * 102
 
 /**
  * Flexibly match column names by trimming whitespace and doing case-insensitive comparison.
- * Returns the actual header key that matches, or null.
  */
 function findColumn(headers, ...possibleNames) {
   for (const header of headers) {
@@ -51,13 +51,16 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
       return res.status(400).json({ error: 'No file uploaded. Please upload an .xlsx or .xls file.' });
     }
 
-    // Parse the Excel file from RAM buffer
-    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+    // Parse the Excel file from RAM buffer or file path
+    const workbook = req.file.buffer
+      ? xlsx.read(req.file.buffer, { type: 'buffer' })
+      : xlsx.readFile(req.file.path);
+
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     const rawData = xlsx.utils.sheet_to_json(sheet);
 
-    if (rawData.length === 0) {
+    if (!rawData || rawData.length === 0) {
       return res.status(400).json({ error: 'The uploaded file contains no data.' });
     }
 
@@ -85,47 +88,33 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
 
     const mentorId = req.user.id;
 
-    // Parse students to match DB schema
+    // Parse students
     const studentsToInsert = rawData
       .filter(row => row[nameCol] && String(row[nameCol]).trim() !== '')
-      .map((row) => ({
-        mentor_id: mentorId,
+      .map((row, idx) => ({
+        id: String(idx + 1),
         name: String(row[nameCol]).trim(),
-        leetcode_handle: leetcodeCol && row[leetcodeCol] ? String(row[leetcodeCol]).trim() : null,
-        github_username: githubCol && row[githubCol] ? String(row[githubCol]).trim() : null
+        leetcodeHandle: leetcodeCol && row[leetcodeCol] ? String(row[leetcodeCol]).trim() : '',
+        githubUsername: githubCol && row[githubCol] ? String(row[githubCol]).trim() : ''
       }));
 
     if (studentsToInsert.length === 0) {
       return res.status(400).json({ error: 'No valid students found in the file.' });
     }
 
-    // Delete existing students for this mentor (to match previous file overwrite behavior)
-    await supabase.from('students').delete().eq('mentor_id', mentorId);
+    // Save students via resilient DB layer
+    const savedStudents = await db.saveStudents(mentorId, studentsToInsert);
 
-    // Bulk insert new students
-    const { data: insertedStudents, error: insertError } = await supabase
-      .from('students')
-      .insert(studentsToInsert)
-      .select();
+    // Clean up temporary file if disk storage was used
+    if (req.file.path && fs.existsSync(req.file.path)) {
+      try { fs.unlinkSync(req.file.path); } catch (e) {}
+    }
 
-    if (insertError) throw insertError;
-
-    // Delete uploaded file after processing
-    fs.unlinkSync(req.file.path);
-
-    console.log(`Uploaded ${insertedStudents.length} students for mentor ${mentorId}`);
-
-    // Map inserted students back to frontend expected format
-    const students = insertedStudents.map(s => ({
-      id: s.id,
-      name: s.name,
-      leetcodeHandle: s.leetcode_handle || '',
-      githubUsername: s.github_username || ''
-    }));
+    console.log(`Uploaded ${savedStudents.length} students for mentor ${mentorId}`);
 
     res.json({
-      message: `Successfully parsed ${students.length} students.`,
-      students,
+      message: `Successfully parsed ${savedStudents.length} students.`,
+      students: savedStudents,
       columnsFound: {
         name: nameCol || null,
         leetcode: leetcodeCol || null,
@@ -142,22 +131,7 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
 router.get('/students', authMiddleware, async (req, res) => {
   try {
     const mentorId = req.user.id;
-
-    const { data, error } = await supabase
-      .from('students')
-      .select('*')
-      .eq('mentor_id', mentorId);
-
-    if (error) throw error;
-
-    // Map DB columns to frontend expected format
-    const students = data.map(s => ({
-      id: s.id,
-      name: s.name,
-      leetcodeHandle: s.leetcode_handle || '',
-      githubUsername: s.github_username || ''
-    }));
-
+    const students = await db.getStudentsByMentor(mentorId);
     res.json({ students });
   } catch (err) {
     console.error('[SERVER ERROR] Get students:', err.stack || err.message);
