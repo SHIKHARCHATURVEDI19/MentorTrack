@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1782963802436",
+    "email": "test@mentor.com",
+    "name": "TestMentor",
+    "password": "$2a$10$OcbBBlwW6Q/F9TJ5RDxjxuAn9KF0EBEWv5zZEVtJKkvCRp4mlVTnO",
+    "createdAt": "2026-07-02T03:43:22.436Z"
+  },
+  {
+    "id": "1782963902632",
+    "email": "shikhardhawan69999@gmail.com",
+    "name": "SHIKHAR CHATURVEDI",
+    "password": "$2a$10$jyxKouZrwBtsfA9dQJN0.OsZTWEzul8NYyZBSfiaX9Vzgh7u.WW0.",
+    "createdAt": "2026-07-02T03:45:02.632Z"
+  }
+]

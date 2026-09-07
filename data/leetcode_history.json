@@ -1,0 +1,34 @@
+{
+  "shikharchaturvedi19": [
+    {
+      "date": "2026-06-30",
+      "totalSolved": 230,
+      "easy": 100,
+      "medium": 110,
+      "hard": 20
+    },
+    {
+      "date": "2026-09-07",
+      "totalSolved": 360,
+      "easy": 136,
+      "medium": 185,
+      "hard": 39
+    }
+  ],
+  "SHIKHARCHATURVEDI19": [
+    {
+      "date": "2026-07-07",
+      "totalSolved": 255,
+      "easy": 106,
+      "medium": 125,
+      "hard": 24
+    },
+    {
+      "date": "2026-07-11",
+      "totalSolved": 258,
+      "easy": 106,
+      "medium": 127,
+      "hard": 25
+    }
+  ]
+}

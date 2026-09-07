@@ -3,17 +3,32 @@ const path = require('path');
 const fetch = require('node-fetch');
 const supabase = require('./supabaseClient');
 
-// Resolve data directory. In serverless read-only environments (like Vercel), fall back to /tmp/data
+// Resolve data directory. On Vercel Serverless, seed data from project data/ to /tmp/data
 let DATA_DIR = path.join(__dirname, '..', 'data');
-try {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+if (process.env.VERCEL) {
+  const tmpDir = path.join('/tmp', 'data');
+  try {
+    if (!fs.existsSync(tmpDir)) {
+      fs.mkdirSync(tmpDir, { recursive: true });
+    }
+    if (fs.existsSync(DATA_DIR)) {
+      const files = fs.readdirSync(DATA_DIR);
+      for (const f of files) {
+        if (f.endsWith('.json') && !fs.existsSync(path.join(tmpDir, f))) {
+          try { fs.copyFileSync(path.join(DATA_DIR, f), path.join(tmpDir, f)); } catch (_) {}
+        }
+      }
+    }
+    DATA_DIR = tmpDir;
+  } catch (e) {
+    DATA_DIR = tmpDir;
   }
-} catch (e) {
-  DATA_DIR = path.join('/tmp', 'data');
-  if (!fs.existsSync(DATA_DIR)) {
-    try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (_) {}
-  }
+} else {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+  } catch (e) {}
 }
 
 const MENTORS_FILE = path.join(DATA_DIR, 'mentors.json');

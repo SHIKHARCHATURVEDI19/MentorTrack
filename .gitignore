@@ -4,9 +4,6 @@ node_modules/
 # Environment variables (SECRETS)
 .env
 
-# User Data (Private mentor/student JSON tracking files)
-data/
-
 # Uploaded Files
 uploads/
 
