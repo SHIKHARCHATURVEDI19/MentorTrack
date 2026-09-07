@@ -2,6 +2,11 @@
   "name": "mentormentee",
   "version": "1.0.0",
   "description": "Mentor-Mentee Tracker Application",
+  "homepage": "https://mentor-track-eosin.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SHIKHARCHATURVEDI19/MentorTrack.git"
+  },
   "main": "server.js",
   "type": "commonjs",
   "scripts": {

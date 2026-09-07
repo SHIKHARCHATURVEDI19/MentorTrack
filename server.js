@@ -37,7 +37,11 @@ app.use(helmet({
 }));
 
 const isProd = process.env.NODE_ENV === 'production';
-const customAllowed = ['https://mentortrack.glbitm.ac.in', 'https://mentormentee.onrender.com'];
+const customAllowed = [
+  'https://mentortrack.glbitm.ac.in',
+  'https://mentormentee.onrender.com',
+  'https://mentor-track-eosin.vercel.app'
+];
 
 app.use(cors({
   origin: function(origin, callback) {

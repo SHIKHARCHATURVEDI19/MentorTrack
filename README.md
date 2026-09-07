@@ -1,8 +1,13 @@
 # 🎓 MentorTrack
 
-MentorTrack is a high-performance, enterprise-grade tracking platform designed for college mentors. It allows mentors to automatically track, monitor, and export the real-time coding progress of their students across LeetCode and GitHub. 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-mentor--track--eosin.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://mentor-track-eosin.vercel.app/)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SHIKHARCHATURVEDI19/MentorTrack)
 
-Built with an intense focus on security, scalable architecture, and zero-dependency frontend performance.
+> 🚀 **Live Production Application:** **[https://mentor-track-eosin.vercel.app/](https://mentor-track-eosin.vercel.app/)**
+
+MentorTrack is a high-performance, enterprise-grade tracking platform designed for mentors. It allows mentors to automatically track, monitor, and export the real-time coding progress of their students across LeetCode and GitHub. 
+
+Built with an intense focus on security, scalable architecture, and a modern Vercel-inspired monochromatic design system.
 
 ## 🚀 Features
 - **Automated Tracking**: Automatically scrapes and parses real-time data from LeetCode and GitHub.
